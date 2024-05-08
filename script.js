@@ -1,10 +1,15 @@
-//store human and computer scores
+//required game variables
 var humanScore = 0;
 var computerScore = 0;
 var turns = 0;
+var humanSelection = "";
 
-//starts the game
-playRound();
+//get the elements from the html
+var yourChoice = document.getElementById("yourChoice");
+var errorMessage = document.getElementById("Error");
+var roundResultsMessage = document.getElementById("roundResults");
+var roundCounterDisplay = document.getElementById("roundCounter");
+
 
 //Returns a random int from 0 - to specified max
 function getRandomInt(max) {
@@ -28,87 +33,127 @@ function getComputerChoice() {
     }
 }
 
-function getHumanChoice() {
+function setHumanChoice(playerChoice) {
     //get the human choice from the user
-    let choice = prompt("Please enter your choice (rock, paper, or scissors):");
+    let choice = playerChoice.toLowerCase();
 
     if (choice === null) {
-        return null;
+        errorMessage.innerText = "Please Enter a valid choice! Choose rock, paper, or scissors.";
+        return;
     }
-
-    choice = choice.toLowerCase();
 
     //check if the choice is valid
     if (choice === "rock" || choice === "paper" || choice === "scissors") {
-        return choice;
-    } else {
-        console.log("Invalid choice. Please enter rock, paper, or scissors.");
-        return getHumanChoice();
+        humanSelection = choice;
+        playRound();
+    }
+    else {
+        errorMessage.innerText = "Invalid choice! Please choose rock, paper, or scissors.";
     }
 }
 
 //plays the first round of rock paper scissors out of 5 rounds
 function playRound() {
-    turns++;
 
-    if (turns <= 5) {
+    let computerSelection = getComputerChoice();
 
-        let humanSelection = getHumanChoice();
-        let computerSelection = getComputerChoice();
-
-        if (humanSelection === null) {
-            return;
-        }
+    if (turns < 5) {
 
         //check if the human and computer choices are the same
         if (humanSelection === computerSelection) {
-            console.log("It's a tie! You both chose " + humanSelection);
-            playRound();
+            tieRound();
+            turns++;
+            roundCounterDisplay.innerText = "Round: " + turns + "/5";
+            checkForGameOver();
             return;
         }
 
+        //handles game logic
         switch (humanSelection) {
             case "rock":
                 if (computerSelection === "scissors") {
-                    playerWins(humanSelection, computerSelection);
+                    playerWinsRound(computerSelection);
                 }
                 else {
-                    computerWins(humanSelection, computerSelection);
+                    computerWinsRound(computerSelection);
                 }
                 break;
             case "paper":
                 if (computerSelection === "rock") {
-                    playerWins(humanSelection, computerSelection);
+                    playerWinsRound(computerSelection);
                 }
                 else {
-                    computerWins(humanSelection, computerSelection);
+                    computerWinsRound(computerSelection);
                 }
                 break;
             case "scissors":
                 if (computerSelection === "paper") {
-                    playerWins(humanSelection, computerSelection);
+                    playerWinsRound(computerSelection);
                 }
                 else {
-                    computerWins(humanSelection, computerSelection);
+                    computerWinsRound(computerSelection);
                 }
                 break;
         }
-
-        playRound();
+        turns++;
+        roundCounterDisplay.innerText = "Round: " + turns + "/5";
+        checkForGameOver();
     }
-    else {
-        console.log("Game Over! Your score: " + humanScore + " Computer score: " + computerScore);
+}
+
+//Check for end of game and handle the end of the game logic
+function checkForGameOver() {
+    if (turns == 5) {
+        if (humanScore > computerScore) {
+            playerWinsGame();
+        }
+        else if (humanScore < computerScore) {
+            computerWinsGame();
+        }
+        else {
+            itsATie();
+        }
     }
 }
 
 //function to increment the human score
-function playerWins(humanSelection, computerSelection) {
+function playerWinsRound(computerSelection) {
     humanScore++;
-    console.log("You win! " + humanSelection + " beats " + computerSelection);
+    roundResultsMessage.innerText = "You win this round! You chose " + humanSelection + " and the AI chose " + computerSelection + "!";
 }
 
 //function to increment the computer score
-function computerWins(humanSelection, computerSelection) {
+function computerWinsRound(computerSelection) {
     computerScore++;
-    console.log("You lose! " + computerSelection + " beats " + humanSelection);
+    roundResultsMessage.innerText = "You loose this round! You chose " + humanSelection + " and the AI chose " + computerSelection + "!";
+}
+
+//function to increment the computer score
+function tieRound(computerSelection) {
+    roundResultsMessage.innerText = "it's a tie! Try again! You chose " + humanSelection + " and the AI chose " + computerSelection + "!";
+}
+
+
+//Player wins game
+function playerWinsGame() {
+    roundResultsMessage.innerText = "Game over! You win! Congratulations!" + " You: " + humanScore + " - AI: " + computerScore;
+}
+
+//Computer wins game
+function computerWinsGame() {
+    roundResultsMessage.innerText = "Game over! Better luck next time!" + " You: " + humanScore + " - AI: " + computerScore;
+}
+
+//its a tie!
+function itsATie() {
+    roundResultsMessage.innerText = "Game over! Sorry, It's a tie!" + " You: " + humanScore + " - AI: " + computerScore;
+}
+
+//Check for end of game and handle the end of the game logic
+function resetGame() {
+    turns = 0;
+    computerScore = 0;
+    humanScore = 0;
+    roundResultsMessage.innerText = "Player hasn't chosen yet";
+    roundCounterDisplay.innerText = "Round: 0/5";
 }
